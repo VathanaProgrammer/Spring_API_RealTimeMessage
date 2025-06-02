@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
 @Entity
 public class Message {
 
@@ -11,23 +12,36 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "sender_id", nullable = false)
-    private User sender; // Sender user
+    @Column(name = "sender_id", nullable = false)
+    private Long senderId;
 
-    @ManyToOne
-    @JoinColumn(name = "receiver_id", nullable = false)
-    private User receiver; // Receiver user
+    @Column(name = "receiver_id", nullable = false)
+    private Long receiverId;
+
+    @Column(name = "sender_name", nullable = false)
+    private String senderName;
+
+    @Column(name = "receiver_name", nullable = false)
+    private String receiverName;
 
     @Column(nullable = false)
     private String content; // Text content of the message
 
+    @Column(name = "timestamp", nullable = false)
     private LocalDateTime timestamp; // When the message was sent
 
     @ElementCollection
     private List<String> images; // List of image URLs or paths attached to the message
 
     // Getters and Setters
+    public String getSenderName(){return this.senderName;}
+
+    public void setSenderName(String senderName){this.senderName = senderName;}
+
+    public String getReceiverName(){return this.receiverName;}
+
+    public void setReceiverName(String receiverName){this.receiverName = receiverName; }
+
     public Long getId() {
         return id;
     }
@@ -36,20 +50,20 @@ public class Message {
         this.id = id;
     }
 
-    public User getSender() {
-        return sender;
+    public Long getSenderId() {
+        return senderId;
     }
 
-    public void setSender(User sender) {
-        this.sender = sender;
+    public void setSenderId(Long senderId) {
+        this.senderId = senderId;
     }
 
-    public User getReceiver() {
-        return receiver;
+    public Long getReceiverId() {
+        return receiverId;
     }
 
-    public void setReceiver(User receiver) {
-        this.receiver = receiver;
+    public void setReceiverId(Long receiverId) {
+        this.receiverId = receiverId;
     }
 
     public String getContent() {

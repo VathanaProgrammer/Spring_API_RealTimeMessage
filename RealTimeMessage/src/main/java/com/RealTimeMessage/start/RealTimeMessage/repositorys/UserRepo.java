@@ -1,7 +1,6 @@
 package com.RealTimeMessage.start.RealTimeMessage.repositorys;
 
 import com.RealTimeMessage.start.RealTimeMessage.models.User;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

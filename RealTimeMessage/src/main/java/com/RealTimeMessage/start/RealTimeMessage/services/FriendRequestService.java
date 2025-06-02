@@ -19,8 +19,13 @@ public class FriendRequestService {
     private UserRepo userRepo;
 
 
-    public FriendRequest sendRequest(User sender, User receiver) {
-        if (repository.existsBySenderIdAndReceiverId(sender.getId(), receiver.getId())) {
+    public FriendRequest sendRequest(Long senderId, Long receiverId) {
+        User sender = userRepo.findById(senderId)
+                .orElseThrow(() -> new RuntimeException("Sender not found"));
+        User receiver = userRepo.findById(receiverId)
+                .orElseThrow(() -> new RuntimeException("Receiver not found"));
+
+        if (repository.existsBySenderIdAndReceiverId(senderId, receiverId)) {
             throw new IllegalStateException("Request already sent");
         }
 
@@ -31,6 +36,7 @@ public class FriendRequestService {
 
         return repository.save(request);
     }
+
 
 
     public List<FriendRequest> getPendingRequests(Long receiverId) {

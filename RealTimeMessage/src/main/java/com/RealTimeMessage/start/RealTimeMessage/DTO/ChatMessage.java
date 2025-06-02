@@ -1,23 +1,26 @@
 package com.RealTimeMessage.start.RealTimeMessage.DTO;
 
+import java.util.List;
+
 public class ChatMessage {
-    private String sender;
-    private String receiver;
+    private String senderName;
     private String content;
-    private String timestamp;
+    private String receiverName;
+    private List<String> images;
 
     // Getters and setters
-    public String getSender() { return sender; }
-    public void setSender(String sender) { this.sender = sender; }
+    public String getReceiverName() { return receiverName; }
+    public void setReceiverName(String receiverName) { this.receiverName = receiverName; }
 
-    public String getReceiver() { return receiver; }
-    public void setReceiver(String receiver) { this.receiver = receiver; }
+    public String getSenderName() { return this.senderName; }
+    public void setSenderName(String senderName) { this.senderName = senderName; }
 
     public String getContent() { return content; }
     public void setContent(String content) { this.content = content; }
 
-    public String getTimestamp() { return timestamp; }
-    public void setTimestamp(String timestamp) { this.timestamp = timestamp; }
+    public List<String> getImages() { return images; }
+    public void setImages(List<String> images) { this.images = images; }
 }
+
 
 

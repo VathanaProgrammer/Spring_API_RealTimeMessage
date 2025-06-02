@@ -10,13 +10,10 @@ import com.RealTimeMessage.start.RealTimeMessage.repositorys.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class PostService {
@@ -34,13 +31,11 @@ public class PostService {
     private ImageRepo imageRepository;
 
 
-    public Post createPost(Long userId, String description, List<MultipartFile> imageFiles) throws Exception {
-        Optional<User> userOptional = userRepository.findById(userId);
-        if (!userOptional.isPresent()) {
-            throw new Exception("User not found");
+    public Post createPost(User user, String description, List<MultipartFile> imageFiles) throws Exception {
+        if (user == null) {
+            throw new Exception("User not authenticated");
         }
 
-        User user = userOptional.get();
         Post post = new Post();
         post.setDescription(description);
         post.setUser(user);
@@ -64,7 +59,7 @@ public class PostService {
 
                 // Create Image entity
                 Image image = new Image();
-                image.setUrl("/upload/" + uniqueName); // This is the URL/path that frontend can use
+                image.setUrl("/upload/" + uniqueName); // URL that frontend can use
                 image.setPost(post);
                 imageList.add(image);
             }
@@ -75,6 +70,7 @@ public class PostService {
 
         return postRepository.save(post);
     }
+
 
     public List<Post> getAllPosts() {
         return postRepository.findAllByOrderByIdDesc();

@@ -3,7 +3,10 @@ package com.RealTimeMessage.start.RealTimeMessage.controllers;
 import com.RealTimeMessage.start.RealTimeMessage.models.FriendRequest;
 import com.RealTimeMessage.start.RealTimeMessage.models.User;
 import com.RealTimeMessage.start.RealTimeMessage.services.FriendRequestService;
+import com.RealTimeMessage.start.RealTimeMessage.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -11,36 +14,55 @@ import java.util.List;
 @RequestMapping("/api/friend-requests")
 public class FriendRequestController {
 
+
     @Autowired
     private FriendRequestService service;
 
+    @Autowired
+    private UserService userService;
+
+
     @PostMapping("/send")
-    public FriendRequest sendRequest(@RequestParam Long senderId, @RequestParam Long receiverId) {
-        User sender = new User(); sender.setId(senderId);
-        User receiver = new User(); receiver.setId(receiverId);
-        return service.sendRequest(sender, receiver);
+    public ResponseEntity<?> sendRequest(
+            @AuthenticationPrincipal User sender,
+            @RequestParam Long receiverId
+    ) {
+        if (sender.getId().equals(receiverId)) {
+            return ResponseEntity.badRequest().body("Cannot friend yourself.");
+        }
+
+        if (!userService.existsById(receiverId)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        service.sendRequest(sender.getId(), receiverId);
+
+        return ResponseEntity.ok("Friend request sent.");
     }
 
     @GetMapping("/pending")
-    public List<FriendRequest> getPendingRequests(@RequestParam Long receiverId) {
+    public List<FriendRequest> getPendingRequests(@AuthenticationPrincipal User user) {
+        Long receiverId = user.getId();
         return service.getPendingRequests(receiverId);
     }
 
-    @PostMapping("/respond")
-    public FriendRequest respondToRequest(@RequestParam Long requestId, @RequestParam String status) {
-        return service.respondToRequest(requestId, status);
+
+    // 2a) Accept a friend request
+    @PostMapping("/accept/{requestId}")
+    public ResponseEntity<?> acceptRequest(@PathVariable Long requestId,
+                                           @AuthenticationPrincipal User user) {
+        // Optionally, verify that `user` is indeed the receiver of that requestId.
+        service.respondToRequest(requestId, "accepted");
+        return ResponseEntity.ok("Friend request accepted.");
     }
 
-    // Get requests received by a user
-    @GetMapping("/received")
-    public List<FriendRequest> getReceivedRequests(@RequestParam Long userId) {
-        return service.getRequestsReceivedByUser(userId);
-    }
-
-    // Optional: Get requests sent by a user
-    @GetMapping("/sent")
-    public List<FriendRequest> getSentRequests(@RequestParam Long userId) {
-        return service.getRequestsSentByUser(userId);
+    // 2b) Reject a friend request
+    @PostMapping("/reject/{requestId}")
+    public ResponseEntity<?> rejectRequest(@PathVariable Long requestId,
+                                           @AuthenticationPrincipal User user) {
+        // Optionally, verify that `user` is indeed the receiver of that requestId.
+        service.respondToRequest(requestId, "rejected");
+        return ResponseEntity.ok("Friend request rejected.");
     }
 
     // Optional: Admin or all requests
