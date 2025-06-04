@@ -31,4 +31,6 @@ public class UserDTO {
     public String getProfileImage() {
         return profileImage;
     }
+
+    public String getEmail() { return this.email; }
 }

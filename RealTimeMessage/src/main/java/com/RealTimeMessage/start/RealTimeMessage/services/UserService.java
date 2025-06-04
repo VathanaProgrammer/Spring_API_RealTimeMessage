@@ -105,4 +105,9 @@ public class UserService implements UserDetailsService {
     public boolean existsById(Long receiverId) {
         return userRepo.findById(receiverId).isPresent();
     }
+
+    public User findById(Long id) {
+        return userRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+    }
 }

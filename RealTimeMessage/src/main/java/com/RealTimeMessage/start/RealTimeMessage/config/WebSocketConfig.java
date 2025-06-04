@@ -34,6 +34,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // 2) Attach the interceptor here
         registry.addEndpoint("/chat")
                 .addInterceptors(jwtHandshakeInterceptor)
-                .setAllowedOriginPatterns("http://localhost:5173");
+                .setAllowedOriginPatterns("http://localhost:5173", "http://172.20.10.2:5173");
     }
 }

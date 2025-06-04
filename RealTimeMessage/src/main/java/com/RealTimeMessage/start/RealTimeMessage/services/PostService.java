@@ -1,9 +1,11 @@
 package com.RealTimeMessage.start.RealTimeMessage.services;
 
-import com.RealTimeMessage.start.RealTimeMessage.models.Image;
+import com.RealTimeMessage.start.RealTimeMessage.DTO.PostDTO;
+import com.RealTimeMessage.start.RealTimeMessage.models.Media;
 import com.RealTimeMessage.start.RealTimeMessage.models.Post;
 import com.RealTimeMessage.start.RealTimeMessage.models.User;
-import com.RealTimeMessage.start.RealTimeMessage.repositorys.ImageRepo;
+import com.RealTimeMessage.start.RealTimeMessage.repositorys.CommentRepo;
+import com.RealTimeMessage.start.RealTimeMessage.repositorys.LikeRepo;
 import com.RealTimeMessage.start.RealTimeMessage.repositorys.PostRepo;
 import com.RealTimeMessage.start.RealTimeMessage.repositorys.UserRepo;
 
@@ -27,11 +29,14 @@ public class PostService {
     @Autowired
     private UserRepo userRepository;
 
+
     @Autowired
-    private ImageRepo imageRepository;
+    private CommentRepo commentRepo;
 
+    @Autowired
+    private LikeRepo likeRepo;
 
-    public Post createPost(User user, String description, List<MultipartFile> imageFiles) throws Exception {
+    public Post createPost(User user, String description, List<MultipartFile> mediaFiles) throws Exception {
         if (user == null) {
             throw new Exception("User not authenticated");
         }
@@ -40,39 +45,50 @@ public class PostService {
         post.setDescription(description);
         post.setUser(user);
 
-        List<Image> imageList = new ArrayList<>();
+        List<Media> mediaList = new ArrayList<>();
 
-        // Make sure the upload folder exists
         Path uploadDir = Paths.get(uploadPath);
         if (!Files.exists(uploadDir)) {
             Files.createDirectories(uploadDir);
         }
 
-        for (MultipartFile file : imageFiles) {
+        for (MultipartFile file : mediaFiles) {
             if (!file.isEmpty()) {
-                // Generate a unique filename to prevent conflicts
-                String uniqueName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+                String originalName = file.getOriginalFilename();
+                String extension = originalName.substring(originalName.lastIndexOf('.') + 1).toLowerCase();
+                String uniqueName = UUID.randomUUID() + "_" + originalName;
                 Path filePath = uploadDir.resolve(uniqueName);
-
-                // Save file to the server
                 Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-                // Create Image entity
-                Image image = new Image();
-                image.setUrl("/upload/" + uniqueName); // URL that frontend can use
-                image.setPost(post);
-                imageList.add(image);
+                Media media = new Media();
+                media.setUrl("/upload/" + uniqueName);
+                media.setType(isVideo(extension) ? "video" : "image");
+                media.setPost(post);
+                mediaList.add(media);
             }
         }
-        System.out.println("Received " + imageFiles.size() + " images");
 
-        post.setImages(imageList);
-
+        post.setMediaFiles(mediaList);
         return postRepository.save(post);
     }
 
-
-    public List<Post> getAllPosts() {
-        return postRepository.findAllByOrderByIdDesc();
+    private boolean isVideo(String extension) {
+        return List.of("mp4", "webm", "ogg", "mov", "quicktime").contains(extension);
     }
+
+
+
+    public List<PostDTO> getAllPosts() {
+        List<Post> posts = postRepository.findAllByOrderByIdDesc();
+        List<PostDTO> responseList = new ArrayList<>();
+
+        for (Post post : posts) {
+            // Instead of manually setting fields one by one, just:
+            PostDTO dto = new PostDTO(post);
+            responseList.add(dto);
+        }
+
+        return responseList;
+    }
+
 }

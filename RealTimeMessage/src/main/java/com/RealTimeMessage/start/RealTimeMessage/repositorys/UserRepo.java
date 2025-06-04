@@ -16,6 +16,7 @@ public interface UserRepo extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
 
+
     //select * from user => go inside user_friends table => select * from user_friends where friend_id = userId
     @Query("SELECT u FROM User u JOIN u.friends f WHERE f.id = :userId")
     List<User> findFriendsOfUser(@Param("userId") Long userId);

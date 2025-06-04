@@ -1,5 +1,6 @@
 package com.RealTimeMessage.start.RealTimeMessage.controllers;
 
+import com.RealTimeMessage.start.RealTimeMessage.DTO.PostDTO;
 import com.RealTimeMessage.start.RealTimeMessage.models.Post;
 import com.RealTimeMessage.start.RealTimeMessage.models.User;
 import com.RealTimeMessage.start.RealTimeMessage.services.PostService;
@@ -25,24 +26,28 @@ public class PostController {
     public ResponseEntity<?> createPost(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam("description") String description,
-            @RequestParam(value = "imageFiles[]", required = false) List<MultipartFile> images
+            @RequestParam(value = "mediaFiles", required = false) List<MultipartFile> mediaFiles
     ) {
         try {
             if (userDetails == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
             }
-            // Cast to your User entity if needed
+
             User user = (User) userDetails;
 
-            Post createdPost = postService.createPost(user, description, images != null ? images : List.of());
-            return ResponseEntity.ok(createdPost);
+            Post createdPost = postService.createPost(user, description, mediaFiles != null ? mediaFiles : List.of());
+            PostDTO postDTO = new PostDTO(createdPost);
+
+            return ResponseEntity.ok(postDTO);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @GetMapping
-    public ResponseEntity<List<Post>> getAllPosts() {
-        return ResponseEntity.ok(postService.getAllPosts());
+    public ResponseEntity<List<PostDTO>> getAllPosts() {
+        List<PostDTO> posts = postService.getAllPosts();
+        return ResponseEntity.ok(posts);
     }
+
 }
